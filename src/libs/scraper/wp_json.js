@@ -5,21 +5,34 @@ module.exports = class WPJson {
         this.axios = require("axios");
     }
 
-    async GetJsonFromSlug (slug) {
+    async GetJsonFromSlug (postSlug) {
         try{
-            const url = this.url + this.api + "/posts?slug=" + slug;
-            const response = await this.axios.get(url);
+            const url = this.url + this.api + "/posts?slug=" + postSlug;
+            const {status, statusText: message, data:ResData} = await this.axios.get(url);
             const imgRex = /<img.*?src="(.*?)"[^>]+>/g;
             const images = [];
             let img;
-            while ((img = imgRex.exec(response.data[0].content.rendered))) {
+            const {id, title, link, date, slug, content} = ResData[0];
+            while ((img = imgRex.exec(content.rendered))) {
                 images.push({
                     url: img[1],
                     name: img[1].substring(img[1].lastIndexOf("/")+1,img[1].length)
                 });
             }
-            return images;
+            return {
+                status,
+                message,
+                data: {
+                    id,
+                    title,
+                    date,
+                    slug,
+                    link,
+                    images
+                }
+            };
         }catch (e) {
+            console.log(e)
             return {
                 status: e.response.status,
                 message: e.response.statusText

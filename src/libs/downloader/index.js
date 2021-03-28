@@ -8,6 +8,6 @@ module.exports = (url, imageName) =>
     }).then(
         response =>
             new Promise((resolve, reject) => {
-                return response.data.pipe(fs.createWriteStream(imageName)).on('finish', () => resolve()).on('error', e => reject(e));
+                response.data.pipe(fs.createWriteStream(imageName)).on('finish', () => resolve()).on('error', e => reject(e));
             }),
     );
