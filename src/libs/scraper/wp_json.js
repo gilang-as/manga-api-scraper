@@ -9,22 +9,30 @@ module.exports = class WPJson {
         try{
             const url = this.url + this.api + "/posts?slug=" + postSlug;
             const {status, statusText: message, data:ResData} = await this.axios.get(url);
-            const imgRex = /<img.*?src="(.*?)"[^>]+>/g;
+            const imgRex = /<img.+?src=[\"'](.+?)[\"'].*?>/g;
+            if(ResData.length === 0) {
+                return {
+                    status: 404,
+                    message: "Not Found"
+                }
+            }
             const images = [];
             let img;
             const {id, title, link, date, slug, content} = ResData[0];
+            let num = 0;
             while ((img = imgRex.exec(content.rendered))) {
                 images.push({
                     url: img[1],
-                    name: img[1].substring(img[1].lastIndexOf("/")+1,img[1].length)
+                    name: `${slug}-${num}`
                 });
+                num++;
             }
             return {
                 status,
                 message,
                 data: {
                     id,
-                    title,
+                    title:title.rendered,
                     date,
                     slug,
                     link,
@@ -40,7 +48,7 @@ module.exports = class WPJson {
         }
     }
 
-    async GetDataFromId (postId) {
+    async GetJsonFromId (postId) {
         try{
             const url = this.url + this.api + "/posts/" + postId;
             const {status, statusText: message, data:ResData} = await this.axios.get(url);
@@ -48,18 +56,20 @@ module.exports = class WPJson {
             const images = [];
             let img;
             const {id, title, link, date, slug, content} = ResData;
+            let num = 0;
             while ((img = imgRex.exec(content.rendered))) {
                 images.push({
                     url: img[1],
-                    name: img[1].substring(img[1].lastIndexOf("/")+1,img[1].length)
+                    name: `${slug}-${num}`
                 });
+                num++;
             }
             return {
                 status,
                 message,
                 data: {
                     id,
-                    title,
+                    title:title.rendered,
                     date,
                     slug,
                     link,
